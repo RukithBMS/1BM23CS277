@@ -1,0 +1,100 @@
+#include <stdio.h>
+#include <string.h>
+
+char infix[20], postfix[20], stack[20], symbol;
+int top = -1, pos = -1, length;
+
+void infixtopostfix();
+void push(char symbol);
+char pop();
+int precedence(char symbol);
+char associativity(char symbol);
+
+int main() {
+    printf("Enter infix expression: ");
+    scanf("%s", infix);
+    infixtopostfix();
+    printf("Infix expression: %s\n", infix);
+    printf("Postfix expression: %s", postfix);
+    return 0;
+}
+
+void infixtopostfix() {
+    length = strlen(infix);
+    for (int i = 0; i < length; i++) {
+        symbol = infix[i];
+
+
+        if ((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z') || (symbol >= '0' && symbol <= '9')) {
+            postfix[++pos] = symbol;
+        }
+
+        else if (symbol == '(') {
+            push(symbol);
+        }
+
+        else if (symbol == ')') {
+            while (top != -1 && stack[top] != '(') {
+                postfix[++pos] = pop();
+            }
+            if (top != -1 && stack[top] == '(') {
+                pop();
+            }
+        }
+
+        else {
+            while (top >= 0 && (precedence(symbol) < precedence(stack[top]) ||
+                (precedence(symbol) == precedence(stack[top]) && associativity(symbol) == 'L'))) {
+                postfix[++pos] = pop();
+            }
+            push(symbol);
+        }
+    }
+
+
+    while (top != -1) {
+        postfix[++pos] = pop();
+    }
+    postfix[++pos] = '\0';
+}
+
+void push(char symbol) {
+    top++;
+    stack[top] = symbol;
+}
+
+char pop() {
+    if (top != -1) {
+        char temp = stack[top];
+        top--;
+        return temp;
+    }
+    return '\0';
+}
+
+int precedence(char symbol) {
+    switch (symbol) {
+        case '+':
+        case '-':
+            return 1;
+        case '*':
+        case '/':
+            return 2;
+        case '^':
+            return 3;
+        default:
+            return -1;
+    }
+}
+
+char associativity(char symbol) {
+    if (symbol == '^') {
+        return 'R';
+    }
+    return 'L';
+}
+
+OUTPUT:
+Enter infix expression: (A*B)/C^(D-E)
+Infix expression: (A*B)/C^(D-E)
+Postfix expression: AB*CDE-^/
